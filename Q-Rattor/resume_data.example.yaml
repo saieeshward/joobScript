@@ -1,0 +1,80 @@
+# resume_data.yaml — YOUR master resume. The pipeline picks from this per job.
+# Copy to resume_data.yaml (setup.sh does this) and replace every placeholder.
+#
+# Rules:
+#   - Only put true facts here. The LLM is told never to invent anything, so
+#     whatever metrics/tools you want on the resume must already be in here.
+#   - `tech` lists drive matching against job descriptions — be generous.
+#   - `full_context` is what the LLM reads to write tailored bullets.
+#   - `end_date` (YYYY-MM) is used to sort newest-first. Use 2099-01 for "Present".
+#   - Keep at least ONE publication and ONE certification, or delete those
+#     sections from resume_template.tex.j2 (an empty list breaks pdflatex).
+
+personal:
+    name: "Your Name"
+    phone: "+000000000000"
+    email: "you@example.com"
+    github: "https://github.com/your-handle"
+    github_display: "github.com/your-handle"
+    linkedin: "https://linkedin.com/in/your-handle"
+    linkedin_display: "linkedin.com/in/your-handle"
+    portfolio: "https://your-site.example.com"
+
+
+work_experience:
+    - title: "Software Engineer"
+      company: "Example Corp"
+      location: "Dublin, Ireland"
+      dates: "Jan 2024--Present"
+      end_date: 2099-01
+      tech: ["Python", "FastAPI", "PostgreSQL", "Docker", "AWS"]
+      full_context: >
+          Describe what you actually did in a few sentences: what you built, the
+          stack, the scale, and any real numbers (latency, users, accuracy, etc.).
+      bullets:
+          - "Fallback bullet used if the LLM is unavailable — action verb + what + result."
+          - "Second fallback bullet."
+
+    - title: "Data Intern"
+      company: "Another Company"
+      location: "Remote"
+      dates: "Jun 2023--Aug 2023"
+      end_date: 2023-08
+      tech: ["Python", "Pandas", "SQL"]
+      full_context: >
+          Same idea — the more concrete detail here, the better the tailored bullets.
+      bullets:
+          - "Fallback bullet one."
+          - "Fallback bullet two."
+
+
+education:
+    - degree: "MSc Computer Science"
+      institution: "Your University"
+      dates: "2024--2025"
+      extra: "Optional line — dissertation, grade, etc. Delete this key if unused."
+
+
+publications:
+    - "Paper title. Venue Year"
+
+
+projects:
+    - name: "Project Name"
+      dates: "2024"
+      end_date: 2024-06
+      tech: ["Python", "PyTorch"]
+      full_context: >
+          What the project is, how it works, what tech, what results.
+      desc: "One-line description used as fallback."
+
+    # Add 5–10 projects; the pipeline picks the 5–6 most relevant per job.
+
+
+certifications:
+    - "Certification Name (Year)"
+
+skills:
+    - "Python"
+    - "SQL"
+    - "Git"

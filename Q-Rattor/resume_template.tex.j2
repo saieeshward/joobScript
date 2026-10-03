@@ -1,0 +1,55 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=0.55in, top=0.45in, bottom=0.45in]{geometry}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{microtype}
+\usepackage{titlesec}
+\usepackage{parskip}
+
+\hypersetup{colorlinks=false, pdfborder={0 0 0}}
+\titleformat{\section}{\normalsize\bfseries\centering}{}{0em}{}[\vspace{-2pt}\hrule\vspace{3pt}]
+\titlespacing*{\section}{0pt}{6pt}{2pt}
+\setlength{\parskip}{0pt}
+\setlength{\parindent}{0pt}
+\pagestyle{empty}
+
+\begin{document}
+
+%% Header
+\begin{center}
+    \href{<< portfolio >>}{\Large\bfseries << name >>}\\[4pt]
+    \begin{tabular}{lllll}
+        << phone >> &
+        \href{mailto:<< email >>}{<< email >>} &
+        \href{<< github >>}{<< github_display >>} &
+        \href{<< linkedin >>}{<< linkedin_display >>} &
+        Dublin, Ireland
+    \end{tabular}
+\end{center}
+
+\section{Summary}
+\noindent << summary_block >>
+
+\section{Work Experience}
+<< work_experience_block >>
+
+\section{Education}
+<< education_block >>
+
+\section{Skills}
+\noindent << skills_line >>
+
+\section{Projects}
+<< projects_block >>
+
+\section{Publications}
+\begin{itemize}[nosep, leftmargin=1.5em, topsep=2pt, itemsep=3pt]
+<< publications_block >>
+\end{itemize}
+
+\section{Certification}
+\begin{itemize}[nosep, leftmargin=1.5em, topsep=2pt, itemsep=2pt]
+<< certifications_block >>
+\end{itemize}
+
+\end{document}

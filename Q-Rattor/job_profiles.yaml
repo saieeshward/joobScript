@@ -1,0 +1,197 @@
+# job_profiles.yaml
+# Defines job categories, classification keywords, and resume section priorities.
+# priority_experiences and priority_projects must match names in resume_data.yaml exactly.
+
+profiles:
+
+  ml_ai:
+    keywords:
+      - machine learning
+      - deep learning
+      - neural network
+      - NLP
+      - natural language processing
+      - computer vision
+      - LLM
+      - large language model
+      - generative AI
+      - RAG
+      - retrieval augmented
+      - transformer
+      - fine-tuning
+      - model training
+      - inference
+      - PyTorch
+      - TensorFlow
+      - diffusion
+      - LSTM
+      - time series
+      - classification
+      - object detection
+      - speech recognition
+      - TTS
+      - STT
+      - audio processing
+      - bioacoustics
+      - AI engineer
+      - ML engineer
+      - data scientist
+      - research scientist
+      - MLOps
+      - model optimisation
+      - model deployment
+      - Ollama
+      - Qwen
+      - multimodal
+    priority_experiences:
+      - "Generative AI Intern at GoWarm"
+      - "ML Research Intern at Virginia Tech India"
+      - "Research Intern at OSCOWL"
+      - "Co-founder at Syncwave Automation"
+    priority_projects:
+      - "WAV2Lip-HQ Inference System"
+      - "Cetacean Species Detection"
+      - "Historical Document Transcription"
+      - "VISU-NG"
+      - "Heart Murmur Detection"
+    summary_focus: >
+      Machine learning engineer and researcher with hands-on experience in generative AI,
+      computer vision, NLP, and audio/speech processing. Published IEEE researcher with a
+      patent in bioacoustic classification. Strong in PyTorch, LLM fine-tuning, and
+      building end-to-end inference pipelines.
+
+  backend:
+    keywords:
+      - backend
+      - REST
+      - API
+      - microservices
+      - database
+      - SQL
+      - NoSQL
+      - distributed
+      - scalable
+      - cloud
+      - AWS
+      - GCP
+      - CI/CD
+      - DevOps
+      - server
+      - data engineering
+      - data pipeline
+      - ETL
+      - information retrieval
+      - search engine
+      - indexing
+      - Go
+      - Golang
+      - Python
+      - Node
+      - full stack
+      - platform
+      - infrastructure
+      - real-time
+      - GPS
+      - tracking
+      - knowledge graph
+    priority_experiences:
+      - "Co-founder at Syncwave Automation"
+      - "Research Intern at OSCOWL"
+      - "Generative AI Intern at GoWarm"
+    priority_projects:
+      - "Is It Legal To"
+      - "CRISP"
+      - "Envio"
+      - "Shellock"
+      - "Spotify Audio Feature Visualization"
+    summary_focus: >
+      Backend and data engineer with experience building production AI platforms,
+      real-time tracking systems, and search infrastructure. Comfortable across Python,
+      Go, and Java with a track record of shipping live products used by real users.
+
+  creative_tech:
+    keywords:
+      - Blender
+      - DaVinci Resolve
+      - 3D modeling
+      - 3D animation
+      - rendering
+      - compositing
+      - motion graphics
+      - VFX
+      - visual effects
+      - video editing
+      - color grading
+      - color science
+      - post production
+      - pipeline TD
+      - technical artist
+      - media technology
+      - creative technologist
+      - visualization
+      - data visualization
+      - interactive media
+      - real-time visualization
+      - animation
+    priority_experiences:
+      - "Research Intern at OSCOWL"
+      - "Generative AI Intern at GoWarm"
+    priority_projects:
+      - "WAV2Lip-HQ Inference System"
+      - "Spotify Audio Feature Visualization"
+      - "VISU-NG"
+    summary_focus: >
+      Creative technologist and ML engineer combining deep learning with media production.
+      Built a 4K lip-sync inference pipeline at 95% accuracy and 30 FPS. Experienced with
+      Blender and DaVinci Resolve for 3D and video work, with strong Python skills for
+      automating creative pipelines.
+
+  research:
+    keywords:
+      - research
+      - academic
+      - university
+      - lab
+      - publication
+      - paper
+      - IEEE
+      - conference
+      - dissertation
+      - thesis
+      - signal processing
+      - biomedical
+      - medical imaging
+      - bioacoustics
+      - marine
+      - satellite
+      - embedded
+      - CubeSat
+      - forecasting
+      - time series
+      - anomaly detection
+    priority_experiences:
+      - "ML Research Intern at Virginia Tech India"
+      - "Research Intern at OSCOWL"
+      - "Co-founder at Syncwave Automation"
+    priority_projects:
+      - "Cetacean Species Detection"
+      - "Historical Document Transcription"
+      - "Heart Murmur Detection"
+      - "V-SAT"
+      - "Hybrid Time Series Forecasting"
+    summary_focus: >
+      ML researcher with two IEEE publications and an Indian patent in bioacoustic species
+      classification. MSc at Trinity College Dublin (Intelligent Systems). Research
+      experience spans audio ML, medical imaging, satellite systems, and historical
+      document analysis using LLMs and CNNs.
+
+  other:
+    keywords: []
+    priority_experiences: []
+    priority_projects: []
+    summary_focus: >
+      Software engineer and ML researcher with experience across AI/ML systems,
+      backend platforms, and real-time media processing. Published IEEE researcher,
+      co-founder of a live AI product, and MSc candidate at Trinity College Dublin.
+      Adaptable across domains with a strong foundation in Python, deep learning, and
+      systems engineering.

@@ -1,0 +1,16 @@
+[project]
+name = "jobscripts"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "feedparser>=6.0.12",
+    "google-generativeai>=0.8.6",
+    "ollama>=0.6.2",
+    "openpyxl>=3.1.5",
+    "pydantic>=2.13.4",
+    "pyyaml>=6.0.3",
+    "requests>=2.33.1",
+    "scrapy>=2.15.2",
+]

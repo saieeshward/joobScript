@@ -1,6 +1,6 @@
 # joobScript — Handoff Guide
 
-**Repo:** https://github.com/saieeshward/joobScript (private — accept the invite first)
+**Repo:** https://github.com/saieeshward/joobScript
 
 Every night it scrapes fresh job listings (LinkedIn, Indeed, Glassdoor), filters them to the roles and
 countries you care about, then writes a **tailored one-page resume PDF for each job** using a local LLM.

@@ -264,6 +264,8 @@ def le(text):
     out = out.replace("$",  "\\$")
     out = out.replace("#",  "\\#")
     out = out.replace("_",  "\\_")
+    out = out.replace("~",  "\\textasciitilde{}")
+    out = out.replace("^",  "\\textasciicircum{}")
     return out
 
 def lb(text):
@@ -274,6 +276,7 @@ def lb(text):
     out = out.replace("\\&", "\x00A\x00").replace("\\%", "\x00P\x00")
     out = out.replace("&", "\\&").replace("%", "\\%")
     out = out.replace("#", "\\#").replace("_", "\\_")
+    out = out.replace("~", "\\textasciitilde{}").replace("^", "\\textasciicircum{}")
     out = out.replace("\x00A\x00", "\\&").replace("\x00P\x00", "\\%")
     return out
 
@@ -357,6 +360,7 @@ def render_and_compile(template_text, resume_data, llm_sections, selected_proj, 
 
     tex = template_text
     tex = tex.replace("<< portfolio >>",         personal["portfolio"])
+    tex = tex.replace("<< location >>",          le(personal.get("location", "")))
     tex = tex.replace("<< name >>",              le(personal["name"]))
     tex = tex.replace("<< phone >>",             personal["phone"])
     tex = tex.replace("<< email >>",             personal["email"])
@@ -371,6 +375,10 @@ def render_and_compile(template_text, resume_data, llm_sections, selected_proj, 
     tex = tex.replace("<< publications_block >>",    pubs)
     tex = tex.replace("<< projects_block >>",        projects_tex(projects_with_meta))
     tex = tex.replace("<< certifications_block >>",  certs)
+
+    for section, items in (("Publications", pubs), ("Certification", certs)):
+        if not items.strip():
+            tex = re.sub(r"\\section\{" + section + r"\}.*?\\end\{itemize\}\n", "", tex, flags=re.S)
 
     tex_path = out_prefix + ".tex"
     log_path = out_prefix + ".log"

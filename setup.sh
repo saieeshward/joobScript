@@ -169,10 +169,8 @@ fi
 
 # ── 5. Folders + personal files ──────────────────────────────────────────────
 mkdir -p logs Q-Rattor/output
-if [[ ! -f Q-Rattor/resume_data.yaml ]]; then
-    cp Q-Rattor/resume_data.example.yaml Q-Rattor/resume_data.yaml
-    warn "Created Q-Rattor/resume_data.yaml from the template — fill it in with YOUR resume."
-fi
+[[ -f Q-Rattor/resume_data.yaml ]]  || cp Q-Rattor/resume_data.example.yaml Q-Rattor/resume_data.yaml
+[[ -f Q-Rattor/job_profiles.yaml ]] || cp Q-Rattor/job_profiles.example.yaml Q-Rattor/job_profiles.yaml
 
 # ── 6. Verify everything end to end ──────────────────────────────────────────
 say "Verifying install"
@@ -205,20 +203,21 @@ if (( WITH_LLM )); then
         >/dev/null && ok "$MODEL answers" || die "$MODEL didn't respond — try: ollama run $MODEL"
 fi
 
-# ── 7. Personalise the search (roles + countries) ───────────────────────────
+# ── 7. Make it yours: CV → resume, job profiles, roles, countries ────────────
 if [[ -t 0 && ! -f user_config.py ]]; then
-    say "Personalising your job search"
+    say "Personalising — have your CV (PDF) ready"
     .venv/bin/python personalize.py
 fi
 
 # ── Done ──────────────────────────────────────────────────────────────────────
-say "All set. Before your first run, personalise these:"
+say "All set."
 cat <<EOF
-    1. Q-Rattor/resume_data.yaml       → your resume (the source of truth)
-    2. Q-Rattor/job_profiles.yaml      → priority_* names + summary_focus for YOU
-    3. Q-Rattor/resume_template.tex.j2 → change the hardcoded "Dublin, Ireland"
-    4. Search roles/countries          → re-run any time: .venv/bin/python personalize.py
+    Your files (all private, never committed):
+      Q-Rattor/resume_data.yaml   → your resume, built from your CV — check it!
+      Q-Rattor/job_profiles.yaml  → your summaries per job type
+      user_config.py              → your roles, countries, keywords
 
-    Then run:   .venv/bin/python run_daily.py
-    Full guide: HANDOFF.md
+    Change any of it later:  .venv/bin/python personalize.py
+    Run the pipeline:        .venv/bin/python run_daily.py
+    Full guide:              HANDOFF.md
 EOF

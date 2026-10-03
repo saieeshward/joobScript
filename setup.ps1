@@ -145,10 +145,8 @@ if (-not $NoLLM) {
 
 # -- 5. Folders + personal files ----------------------------------------------
 New-Item -ItemType Directory -Force -Path logs, "Q-Rattor\output" | Out-Null
-if (-not (Test-Path "Q-Rattor\resume_data.yaml")) {
-    Copy-Item "Q-Rattor\resume_data.example.yaml" "Q-Rattor\resume_data.yaml"
-    Warn "Created Q-Rattor\resume_data.yaml from the template - fill it in with YOUR resume."
-}
+if (-not (Test-Path "Q-Rattor\resume_data.yaml"))  { Copy-Item "Q-Rattor\resume_data.example.yaml"  "Q-Rattor\resume_data.yaml" }
+if (-not (Test-Path "Q-Rattor\job_profiles.yaml")) { Copy-Item "Q-Rattor\job_profiles.example.yaml" "Q-Rattor\job_profiles.yaml" }
 
 # -- 6. Verify everything end to end ------------------------------------------
 Say "Verifying install"
@@ -184,20 +182,21 @@ if (-not $NoLLM) {
     } catch { Die "$Model didn't respond - try: ollama run $Model" }
 }
 
-# -- 7. Personalise the search (roles + countries) ---------------------------
+# -- 7. Make it yours: CV -> resume, job profiles, roles, countries ------------
 if (-not (Test-Path "user_config.py")) {
-    Say "Personalising your job search"
+    Say "Personalising - have your CV (PDF) ready"
     & $VPy personalize.py
 }
 
 # -- Done ----------------------------------------------------------------------
-Say "All set. Before your first run, personalise these:"
+Say "All set."
 Write-Host @"
-    1. Q-Rattor\resume_data.yaml       -> your resume (the source of truth)
-    2. Q-Rattor\job_profiles.yaml      -> priority_* names + summary_focus for YOU
-    3. Q-Rattor\resume_template.tex.j2 -> change the hardcoded "Dublin, Ireland"
-    4. Search roles/countries          -> re-run any time: .venv\Scripts\python.exe personalize.py
+    Your files (all private, never committed):
+      Q-Rattor\resume_data.yaml   -> your resume, built from your CV - check it!
+      Q-Rattor\job_profiles.yaml  -> your summaries per job type
+      user_config.py              -> your roles, countries, keywords
 
-    Then run:   .venv\Scripts\python.exe run_daily.py
-    Full guide: HANDOFF.md
+    Change any of it later:  .venv\Scripts\python.exe personalize.py
+    Run the pipeline:        .venv\Scripts\python.exe run_daily.py
+    Full guide:              HANDOFF.md
 "@

@@ -7,7 +7,9 @@ countries you care about, then writes a **tailored one-page resume PDF for each 
 Each morning you get a list of apply links, each paired with its own resume.
 
 ```
- personalize.py ─► user_config.py   (your roles, countries, keywords)
+ your CV (PDF) ─► personalize.py ─► Q-Rattor/resume_data.yaml   (your master resume)
+                                  ├─► Q-Rattor/job_profiles.yaml  (your summaries per job type)
+                                  └─► user_config.py              (your roles, countries, keywords)
                         │
  run_daily.py ──► main.py ──────────► jobs.jsonl          scrape last-24h jobs, dedupe, filter, rank
               ├─► resort_jobs.py ───► jobs.jsonl          sort by priority + your preferred locations
@@ -24,7 +26,8 @@ Each morning you get a list of apply links, each paired with its own resume.
 Clone, then run the setup script. It **checks your system and installs anything missing**: Homebrew/apt
 packages, Python 3.10+, git, a virtualenv with all Python packages, headless Chromium, LaTeX + the exact
 packages the resume template needs, Ollama + the `qwen2.5:7b` model (~4.7GB). Then it **verifies**
-everything (launches Chromium, compiles a test PDF, pings the model) and walks you through picking your roles.
+everything (launches Chromium, compiles a test PDF, pings the model) and asks for **your CV** to set
+the rest up for you (step 2).
 
 **macOS / Linux (Ubuntu/Debian)**
 ```bash
@@ -47,17 +50,22 @@ It's safe to re-run setup any time; finished steps are skipped.
 
 ---
 
-## 2. Make it yours (do this before the first run)
+## 2. Make it yours — from your CV
 
-| What | File | Notes |
-|---|---|---|
-| **Roles + countries** | `personalize.py` | Runs automatically at the end of setup. Type your roles, **or press Enter and give it your CV (PDF/txt)** — the local LLM suggests roles, priority keywords and your seniority. Re-run any time. |
-| **Your resume** | `Q-Rattor/resume_data.yaml` | Created from the template. This is the source of truth — the LLM only rephrases what's here and is told never to invent facts. Put real metrics in `full_context`. |
-| **Your summaries** | `Q-Rattor/job_profiles.yaml` | ⚠️ The `summary_focus` text is **mine** — rewrite it for you (it's used as your summary whenever the LLM is off). Also update `priority_experiences` / `priority_projects` to your own entry names. |
-| **Header location** | `Q-Rattor/resume_template.tex.j2` | Change the hardcoded `Dublin, Ireland`. |
+At the end of setup, `personalize.py` asks for your CV (PDF, .txt or .md — drag the file into the
+terminal). From that one file the local LLM builds everything my setup has, but with **your** details:
 
-> Keep at least one `publications` and one `certifications` entry in `resume_data.yaml`, or delete those
-> two sections from the template — an empty list makes pdflatex fail.
+| It creates | What it is |
+|---|---|
+| `Q-Rattor/resume_data.yaml` | Your master resume: contact details, every job, project, skill. The pipeline tailors this per job and **never invents facts**, so it's only as good as what's here. |
+| `Q-Rattor/job_profiles.yaml` | Your resume summary per job type (ML, backend, research…) and which of your jobs/projects to lead with for each. |
+| `user_config.py` | Roles to search (suggested from your CV, or type your own), countries, seniority filter, priority keywords. |
+
+**Then spend 5 minutes checking `resume_data.yaml`.** The AI can misread a PDF. Add any real numbers
+(users, accuracy, % improvements) to `full_context`, because better input gives better tailored bullets.
+
+Re-run `personalize.py` any time to change roles/countries or rebuild from an updated CV.
+No Ollama? It still asks for roles and countries; fill `resume_data.yaml` by hand from the template.
 
 Advanced knobs (pages per query, max jobs per night, delays) live in `config.py`; anything in
 `user_config.py` overrides it.
@@ -110,7 +118,7 @@ The machine has to be awake at that time.
 | A site returns 0 jobs | Sites change their HTML. Update the CSS selectors in `scrapers/<site>.py` (inspect the live page in DevTools). |
 | Getting blocked / CAPTCHAs | Lower `MAX_CONCURRENT_SCRAPERS`, raise the delays in `config.py`. Don't scrape more than once a day. |
 | `Ollama failed ... using fallback` | Ollama isn't running — open the app or run `ollama serve`. Resumes still get built, just untailored. |
-| `pdflatex failed` | Read `Q-Rattor/output/<job>.log`. Usually an unescaped special character or an empty section in `resume_data.yaml`. |
+| `pdflatex failed` | Read `Q-Rattor/output/<job>.log`. Usually a stray special character or emoji in `resume_data.yaml`. |
 | Resumes skipped as "senior-level" | `pipeline.py` skips senior/lead roles on purpose. Remove that check in `main()` if you're senior. |
 | Anything after an update | Re-run `setup.sh` / `setup.ps1`. |
 
@@ -120,7 +128,7 @@ Logs: `logs/run.log` (scraper) and `logs/daily.log` (whole pipeline).
 
 ## What's *not* in the repo
 
-Personal data stays local and is gitignored: `resume_data.yaml`, `user_config.py`, `jobs.jsonl`,
+Personal data stays local and is gitignored: `resume_data.yaml`, `job_profiles.yaml`, `user_config.py`, `jobs.jsonl`,
 `seen_jobs.db`, `final_apply.json`, generated PDFs, logs. You start clean.
 
 Respect each site's terms of service. This only reads public job listings, once a day.

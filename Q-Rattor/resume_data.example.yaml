@@ -7,8 +7,7 @@
 #   - `tech` lists drive matching against job descriptions — be generous.
 #   - `full_context` is what the LLM reads to write tailored bullets.
 #   - `end_date` (YYYY-MM) is used to sort newest-first. Use 2099-01 for "Present".
-#   - Keep at least ONE publication and ONE certification, or delete those
-#     sections from resume_template.tex.j2 (an empty list breaks pdflatex).
+#   - publications / certifications can be empty lists ([]) — the section is dropped.
 
 personal:
     name: "Your Name"
@@ -19,6 +18,7 @@ personal:
     linkedin: "https://linkedin.com/in/your-handle"
     linkedin_display: "linkedin.com/in/your-handle"
     portfolio: "https://your-site.example.com"
+    location: "Dublin, Ireland"          # shown in the resume header
 
 
 work_experience:

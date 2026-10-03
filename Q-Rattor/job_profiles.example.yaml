@@ -1,0 +1,147 @@
+# job_profiles.yaml — job categories, classification keywords, and what to emphasise per category.
+# Each scraped job is classified by counting `keywords` hits in its text.
+#
+# personalize.py fills in the personal parts from YOUR resume:
+#   summary_focus         — fallback resume summary for this category (used when Ollama is off)
+#   priority_experiences  — company names from resume_data.yaml to favour for this category
+#   priority_projects     — project names from resume_data.yaml to favour for this category
+# Edit `keywords` freely to add categories that fit your field.
+
+profiles:
+  ml_ai:
+    keywords:
+    - machine learning
+    - deep learning
+    - neural network
+    - NLP
+    - natural language processing
+    - computer vision
+    - LLM
+    - large language model
+    - generative AI
+    - RAG
+    - retrieval augmented
+    - transformer
+    - fine-tuning
+    - model training
+    - inference
+    - PyTorch
+    - TensorFlow
+    - diffusion
+    - LSTM
+    - time series
+    - classification
+    - object detection
+    - speech recognition
+    - TTS
+    - STT
+    - audio processing
+    - bioacoustics
+    - AI engineer
+    - ML engineer
+    - data scientist
+    - research scientist
+    - MLOps
+    - model optimisation
+    - model deployment
+    - Ollama
+    - Qwen
+    - multimodal
+    priority_experiences: []
+    priority_projects: []
+    summary_focus: PLACEHOLDER - run personalize.py to write this from your resume, or replace by hand.
+  backend:
+    keywords:
+    - backend
+    - REST
+    - API
+    - microservices
+    - database
+    - SQL
+    - NoSQL
+    - distributed
+    - scalable
+    - cloud
+    - AWS
+    - GCP
+    - CI/CD
+    - DevOps
+    - server
+    - data engineering
+    - data pipeline
+    - ETL
+    - information retrieval
+    - search engine
+    - indexing
+    - Go
+    - Golang
+    - Python
+    - Node
+    - full stack
+    - platform
+    - infrastructure
+    - real-time
+    - GPS
+    - tracking
+    - knowledge graph
+    priority_experiences: []
+    priority_projects: []
+    summary_focus: PLACEHOLDER - run personalize.py to write this from your resume, or replace by hand.
+  creative_tech:
+    keywords:
+    - Blender
+    - DaVinci Resolve
+    - 3D modeling
+    - 3D animation
+    - rendering
+    - compositing
+    - motion graphics
+    - VFX
+    - visual effects
+    - video editing
+    - color grading
+    - color science
+    - post production
+    - pipeline TD
+    - technical artist
+    - media technology
+    - creative technologist
+    - visualization
+    - data visualization
+    - interactive media
+    - real-time visualization
+    - animation
+    priority_experiences: []
+    priority_projects: []
+    summary_focus: PLACEHOLDER - run personalize.py to write this from your resume, or replace by hand.
+  research:
+    keywords:
+    - research
+    - academic
+    - university
+    - lab
+    - publication
+    - paper
+    - IEEE
+    - conference
+    - dissertation
+    - thesis
+    - signal processing
+    - biomedical
+    - medical imaging
+    - bioacoustics
+    - marine
+    - satellite
+    - embedded
+    - CubeSat
+    - forecasting
+    - time series
+    - anomaly detection
+    priority_experiences: []
+    priority_projects: []
+    summary_focus: PLACEHOLDER - run personalize.py to write this from your resume, or replace by hand.
+  other:
+    keywords: []
+    priority_experiences: []
+    priority_projects: []
+    summary_focus: PLACEHOLDER - run personalize.py to write this from your resume, or replace by hand.

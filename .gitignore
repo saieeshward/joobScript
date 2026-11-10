@@ -26,3 +26,8 @@ user_config.py
 
 # Personal job profiles (generated from your resume by personalize.py)
 Q-Rattor/job_profiles.yaml
+
+# Backups of personal data
+Q-Rattor/*.bak*
+Q-Rattor/archive/
+joobScript.clan

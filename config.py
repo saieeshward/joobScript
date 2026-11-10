@@ -27,7 +27,8 @@ SEARCH_QUERIES = [
 ENABLED_SITES = [
     "linkedin",      # ✅ working — regions set by LINKEDIN_GEOS
     "indeed",        # ✅ working — countries set by INDEED_COUNTRIES
-    "glassdoor",     # ✅ working — countries set by GLASSDOOR_COUNTRIES
+    # "glassdoor",   # ❌ off by default: Cloudflare human check on job pages + redirects Ireland searches to Canada.
+                     #    Re-enable only if you want titles/links without descriptions (countries: GLASSDOOR_COUNTRIES).
     # "bayt",        # ❌ blocked — 0 results on all queries
     # "irishjobs",   # ❌ blocked — 0 results on all queries
     # "gulfttalent", # ❌ blocked — request timeout
@@ -136,6 +137,20 @@ MAX_JOBS_PER_RUN = 20
 # Early-stop pagination: if this fraction of a listing page's jobs are already in seen_jobs.db,
 # stop fetching more pages for that query. 0.5 = stop when half the page is familiar.
 EARLY_STOP_THRESHOLD = 0.7
+
+
+# LinkedIn (HTTP mode): results to read per query per region, 10 per request.
+LINKEDIN_RESULTS_PER_QUERY = 60
+
+# Detail pages (job descriptions) fetched at the same time per scraper. 3 is gentle enough to avoid blocks.
+DETAIL_CONCURRENCY = 3
+
+# Drop internships/co-ops/placements/volunteering at scrape time (you are a graduate, not a student).
+SKIP_INTERNSHIPS = True
+
+# Titles outside AI/ML/data/software are dropped before any description is fetched, unless they contain
+# one of these (kept so the food-tech queries above still work).
+EXTRA_TITLE_KEYWORDS = ["food", "restaurant", "hospitality", "culinary", "agritech", "kitchen"]
 
 
 # ── Personal overrides ────────────────────────────────────────────────────────

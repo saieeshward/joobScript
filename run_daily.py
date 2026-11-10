@@ -33,9 +33,7 @@ def run(label: str, cmd: list[str], cwd: Path = ROOT) -> bool:
 
 def main():
     if not run("Scrape jobs", [sys.executable, "main.py"]):
-        sys.exit(1)
-
-    run("Sort by location", [sys.executable, "resort_jobs.py"])
+        log.warning("Scrape failed; continuing with jobs already waiting in jobs.jsonl.")
 
     if not run("Generate resumes", [sys.executable, "pipeline.py"], cwd=ROOT / "Q-Rattor"):
         sys.exit(1)

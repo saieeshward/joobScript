@@ -1,55 +1,35 @@
-\documentclass[11pt,a4paper]{article}
-\usepackage[margin=0.55in, top=0.45in, bottom=0.45in]{geometry}
+\documentclass[10pt,a4paper]{article}
+\usepackage[margin=0.6in, top=0.45in, bottom=0.4in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}                 % Latin Modern: ships with every TeX Live, incl. the basic scheme
+\renewcommand{\familydefault}{\sfdefault}
+\usepackage{xcolor}
 \usepackage{enumitem}
 \usepackage{hyperref}
 \usepackage{microtype}
 \usepackage{titlesec}
-\usepackage{parskip}
 
-\hypersetup{colorlinks=false, pdfborder={0 0 0}}
-\titleformat{\section}{\normalsize\bfseries\centering}{}{0em}{}[\vspace{-2pt}\hrule\vspace{3pt}]
-\titlespacing*{\section}{0pt}{6pt}{2pt}
-\setlength{\parskip}{0pt}
+\definecolor{accent}{HTML}{1F3A5F}
+\definecolor{linkc}{HTML}{1A4FA0}
+\hypersetup{colorlinks=true, urlcolor=linkc, linkcolor=linkc,
+            pdftitle={<< name >> - Resume}, pdfauthor={<< name >>}}
+
+\linespread{1.04}
 \setlength{\parindent}{0pt}
+\setlength{\parskip}{0pt}
 \pagestyle{empty}
+\raggedbottom
+
+% Section headings: small sans caps in accent colour with a hairline under them
+\titleformat{\section}{\sffamily\bfseries\small\color{accent}}{}{0em}{\MakeUppercase}[\vspace{-1pt}{\color{accent}\titlerule[0.6pt]}]
+\titlespacing*{\section}{0pt}{9pt}{4pt}
+
+\setlist[itemize]{leftmargin=1.1em, itemsep=1.6pt, topsep=2pt, parsep=0pt, partopsep=0pt, label=\textbullet}
 
 \begin{document}
 
-%% Header
-\begin{center}
-    \href{<< portfolio >>}{\Large\bfseries << name >>}\\[4pt]
-    \begin{tabular}{lllll}
-        << phone >> &
-        \href{mailto:<< email >>}{<< email >>} &
-        \href{<< github >>}{<< github_display >>} &
-        \href{<< linkedin >>}{<< linkedin_display >>} &
-        << location >>
-    \end{tabular}
-\end{center}
+<< header >>
 
-\section{Summary}
-\noindent << summary_block >>
-
-\section{Work Experience}
-<< work_experience_block >>
-
-\section{Education}
-<< education_block >>
-
-\section{Skills}
-\noindent << skills_line >>
-
-\section{Projects}
-<< projects_block >>
-
-\section{Publications}
-\begin{itemize}[nosep, leftmargin=1.5em, topsep=2pt, itemsep=3pt]
-<< publications_block >>
-\end{itemize}
-
-\section{Certification}
-\begin{itemize}[nosep, leftmargin=1.5em, topsep=2pt, itemsep=2pt]
-<< certifications_block >>
-\end{itemize}
+<< body >>
 
 \end{document}

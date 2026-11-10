@@ -116,3 +116,11 @@ def test_match_report_verdicts(resume):
     assert weak["verdict"] == g.WEAK and "skills gap" in weak["reason"]
     assert g.match_report(resume, "Engineer", "5+ years of experience with python sql rag llm")["verdict"] == g.WEAK
     assert g.match_report(resume, "Engineer", "Python")["verdict"] == g.UNCLEAR
+
+
+def test_unsupported_skills_guard(resume):
+    g = P.guards
+    assert g.unsupported_skills(["Skilled in Python, Go, Rust and Kubernetes"], resume) == ["Go", "kubernetes", "rust"]   # example resume lists neither
+    assert g.unsupported_skills(["Built a RAG tool in Python. Go to market with the team."], resume) == []
+    out = {"summary": "Fluent in Kubernetes", "work_experience": [], "projects": []}
+    assert any("kubernetes" in b for b in P.check_sections(out, resume, [], [], P.guards.allowed_numbers(resume))[1])

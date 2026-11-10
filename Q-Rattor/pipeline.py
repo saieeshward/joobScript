@@ -261,6 +261,8 @@ def check_sections(llm_out, resume_data, exps, projs_sel, allowed):
         by_proj[str(p.get("name", "")).strip().lower()] = str(p.get("desc", ""))
         texts.append(by_proj[str(p.get("name", "")).strip().lower()])
     bad = guards.number_violations(texts, allowed)
+    skills_bad = guards.unsupported_skills(texts, resume_data)
+    bad += ["skill not on your approved list: " + s for s in skills_bad]
     return {"by_company": by_company, "by_proj": by_proj}, bad
 
 
@@ -486,8 +488,9 @@ def tailor(resume_data, system_prompt, job, primary_type, profile, exps, projs_s
             return None, "", [], "curated"
         checked, bad = check_sections(out, resume_data, exps, projs_sel, allowed)
         if not bad:
-            return checked, str(out.get("summary", "")).strip(), out.get("skills", []), backend
-        feedback = "these numbers are not in the candidate facts: %s. Remove them." % ", ".join(bad)
+            summary = str(out.get("summary", "")).strip() if backend == "claude" else ""   # weaker models: approved summary
+            return checked, summary, out.get("skills", []), backend
+        feedback = "remove or fix these (not in the candidate facts / approved skills): %s." % ", ".join(bad)
         print("  Fact check failed (" + backend + ", attempt " + str(attempt) + "): " + ", ".join(bad))
     return None, "", [], "curated"
 

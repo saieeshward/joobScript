@@ -173,3 +173,25 @@ def match_report(resume_data: dict, title: str, description: str) -> dict:
         verdict, reason = PARTIAL, "you cover %d of %d skills; missing %s" % (len(have), len(want), ", ".join(gap[:4]))
     return {"verdict": verdict, "reason": reason, "coverage": round(100 * cov), "want": want, "have": have,
             "gap": gap, "years": yrs}
+
+
+# ── Skills guard: the model may not mention a tech skill the candidate has not approved ─────────────
+_GENERIC = {"go", "rest", "api", "agents", "evaluation", "node", "git", "linux", "embeddings"}   # too ambiguous as plain words
+
+
+def unsupported_skills(texts, resume_data: dict) -> list[str]:
+    """Tech names in the model's text that are not on the candidate's approved skill list (e.g. a 7B model adding
+    'Go' or 'Kubernetes'). Returns the offending names."""
+    text = " ".join(str(t) for t in texts)
+    low = text.lower()
+    vocab = skill_vocabulary(resume_data)
+    bad = []
+    for k in KEYWORDS:
+        if k in _GENERIC or k in vocab or _ALIASES.get(k, "") in vocab:
+            continue
+        if has_term(k, low):
+            bad.append(k)
+    # "Go" the language: only flag it in list-like positions ("Python, Go, Rust"), never in ordinary sentences
+    if "go" not in vocab and re.search(r"(?<=[a-z,] )Go(?=[ ,.;])", text) and re.search(r"[A-Za-z+#]+, Go\b|\bGo, [A-Za-z+#]+", text):
+        bad.append("Go")
+    return sorted(set(bad))

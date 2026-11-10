@@ -122,8 +122,54 @@ def skill_vocabulary(resume_data: dict) -> dict[str, str]:
     vocab = {}
     for s in resume_data.get("skills", []):
         vocab[s.lower()] = s
+    for items in (resume_data.get("skill_groups") or {}).values():      # grouped skills are approved too
+        for s in items:
+            vocab.setdefault(s.lower(), s)
     for sec in ("work_experience", "projects"):
         for e in resume_data.get(sec, []):
             for t in e.get("tech", []):
                 vocab.setdefault(t.lower(), t)
     return vocab
+
+
+# ── Match report: how well the candidate's real skills cover what the job asks for ──────────────────
+KEYWORDS = [
+    "python", "pytorch", "tensorflow", "keras", "scikit-learn", "pandas", "numpy", "sql", "nosql", "postgres",
+    "mongodb", "docker", "kubernetes", "aws", "azure", "gcp", "terraform", "ci/cd", "git", "linux", "rest",
+    "api", "fastapi", "flask", "django", "react", "typescript", "javascript", "node", "java", "go", "rust", "c++",
+    "llm", "llms", "rag", "nlp", "computer vision", "machine learning", "deep learning", "generative ai", "genai",
+    "prompt engineering", "fine-tuning", "agents", "mlops", "spark", "kafka", "airflow", "dbt", "tableau",
+    "power bi", "langchain", "vector database", "embeddings", "evaluation", "data pipelines", "etl",
+]
+_ALIASES = {"llm": "llms", "genai": "generative ai", "agents": "agentic ai", "rest": "api development",
+            "api": "api development", "evaluation": "llm evaluation", "vector database": "qdrant",
+            "embeddings": "rag", "fine-tuning": "fine-tuning"}
+STRONG, PARTIAL, WEAK, UNCLEAR = "Strong match", "Partial match", "NOT a strong match", "Unclear (short description)"
+
+
+def has_term(term: str, text: str) -> bool:
+    return re.search(r"(?<![a-z0-9+#])" + re.escape(term) + r"(?![a-z0-9+#])", text) is not None
+
+
+def match_report(resume_data: dict, title: str, description: str) -> dict:
+    """Honest verdict, in the spirit of 'say so when a role is not a strong match'.
+    have = keywords the job asks for that the candidate genuinely has; gap = ones the candidate does not list."""
+    text = (title + "\n" + description).lower()
+    want = [k for k in KEYWORDS if has_term(k, text)]
+    vocab = skill_vocabulary(resume_data)
+    have = [k for k in want if k in vocab or _ALIASES.get(k, "") in vocab]
+    gap = [k for k in want if k not in have]
+    yrs = required_years(text)
+    cov = len(have) / len(want) if want else 0.0
+    if yrs is not None and yrs >= MAX_YEARS_REQUIRED:
+        verdict, reason = WEAK, "seniority mismatch: asks for %d+ years" % yrs
+    elif len(want) < 4:
+        verdict, reason = UNCLEAR, "too few recognisable skills in the description to judge"
+    elif cov < 0.25:
+        verdict, reason = WEAK, "skills gap: job asks for %s" % ", ".join(gap[:5])
+    elif cov >= 0.6:
+        verdict, reason = STRONG, "you cover %d of %d skills the job names" % (len(have), len(want))
+    else:
+        verdict, reason = PARTIAL, "you cover %d of %d skills; missing %s" % (len(have), len(want), ", ".join(gap[:4]))
+    return {"verdict": verdict, "reason": reason, "coverage": round(100 * cov), "want": want, "have": have,
+            "gap": gap, "years": yrs}

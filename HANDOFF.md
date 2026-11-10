@@ -2,7 +2,7 @@
 
 **Repo:** https://github.com/saieeshward/joobScript
 
-Every night it scrapes fresh job listings (LinkedIn, Indeed, Glassdoor), filters them to the roles and
+Every night it scrapes fresh job listings (LinkedIn, company career boards, Indeed), filters them to the roles and
 countries you care about, then writes a **tailored one-page resume PDF for each job** using a local LLM.
 Each morning you get a list of apply links, each paired with its own resume.
 
@@ -12,7 +12,7 @@ Each morning you get a list of apply links, each paired with its own resume.
                                   └─► user_config.py              (your roles, countries, keywords)
                         │
  run_daily.py ──► main.py ──────────► jobs.jsonl          scrape last-24h jobs (LinkedIn over plain HTTP, ~10s;
-              │                                           Indeed/Glassdoor via browser), real job location, full descriptions
+              │                                           company boards via public APIs; Indeed via browser), real job location, full descriptions
               └─► Q-Rattor/pipeline.py                    per job: screen (no senior/intern/3+ yrs/non-Irish-without-sponsorship),
                         │                                 pick your best experience/projects, Claude Code (headless) rewrites
                         │                                 the wording in plain English, Ollama is the fallback, then a fact
@@ -102,19 +102,31 @@ Already-seen jobs are skipped automatically (`seen_jobs.db`, 30-day window), so 
 
 ## 4. Run it every night (optional)
 
-**macOS / Linux** — `crontab -e`, add (10pm daily):
-```
-0 22 * * * cd /full/path/to/joobScript && .venv/bin/python run_daily.py >> logs/cron.log 2>&1
-```
-On macOS, keep Ollama running at login (`brew services start ollama`, or open the Ollama app).
+`run_nightly.py` is the unattended version of step 3: scrape, screen, write resumes, then write a morning summary
+(**`Q-Rattor/today.md`**: apply links, resume PDFs, what was skipped) and show a notification.
 
-**Windows** — in PowerShell:
-```powershell
-schtasks /Create /SC DAILY /ST 22:00 /TN joobScript /TR "cmd /c cd /d C:\full\path\to\joobScript && .venv\Scripts\python.exe run_daily.py >> logs\cron.log 2>&1"
+```bash
+.venv/bin/python run_nightly.py --dry-run     # try it: screens already-scraped jobs, no model, no PDFs
+.venv/bin/python run_nightly.py               # the real thing
 ```
-The Ollama app starts with Windows by default.
 
-The machine has to be awake at that time.
+**macOS, daily at 06:00** (a per-user LaunchAgent, removable with `--uninstall`):
+```bash
+./scripts/install_launchd.sh 06:00
+sudo pmset repeat wakeorpoweron MTWRFSU 05:55:00     # optional: wake the Mac just before
+```
+**Linux:** `0 6 * * * cd /full/path/to/joobScript && .venv/bin/python run_nightly.py >> logs/cron.log 2>&1`
+**Windows:** `schtasks /Create /SC DAILY /ST 06:00 /TN joobScript /TR "cmd /c cd /d C:\full\path\to\joobScript && .venv\Scripts\python.exe run_nightly.py"`
+
+**Which language model writes the wording?** By default the nightly run uses local Ollama only, and falls back to your
+approved wording from `resume_data.yaml` if Ollama is not running, so it never spends anyone's Claude quota by surprise.
+To let it use Claude Code, copy `nightly.env.example` to `nightly.env` and set `JOOB_LLM_ORDER=claude,ollama`. Do that
+only for an account that is yours to automate (a work/Team plan usually is not). Claude is also skipped automatically when
+`~/.claude.json` shows 5-hour or weekly usage above `JOOB_MAX_FIVE_HOUR_UTIL` / `JOOB_MAX_WEEKLY_UTIL` (60% by default),
+and each night is capped by `JOOB_MAX_CLAUDE_CALLS`. Starting at 06:00 opens the 5-hour usage window early, so it has
+reset by the time you start work.
+
+The machine has to be awake at that time. Logs: `logs/nightly-YYYYMMDD.log`.
 
 ---
 

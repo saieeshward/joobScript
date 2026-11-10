@@ -26,6 +26,7 @@ SEARCH_QUERIES = [
 # "linkedin" and "indeed" are controlled by LINKEDIN_GEOS and INDEED_COUNTRIES below.
 ENABLED_SITES = [
     "linkedin",      # ✅ working — regions set by LINKEDIN_GEOS
+    "boards",        # ✅ working — company career boards (Greenhouse/Ashby/Lever), full descriptions, no bot walls
     "indeed",        # ✅ working — countries set by INDEED_COUNTRIES
     # "glassdoor",   # ❌ off by default: Cloudflare human check on job pages + redirects Ireland searches to Canada.
                      #    Re-enable only if you want titles/links without descriptions (countries: GLASSDOOR_COUNTRIES).
@@ -67,6 +68,20 @@ GLASSDOOR_COUNTRIES = [
     # "in",   # India
     # "ae",   # UAE
 ]
+
+
+# ── Company career boards ─────────────────────────────────────────────────────
+# Public JSON APIs from Greenhouse / Ashby / Lever. Only jobs located in Ireland are read. The token is the slug in
+# the company's careers URL (boards.greenhouse.io/<token>, jobs.ashbyhq.com/<token>, jobs.lever.co/<token>).
+# Each token below was checked on 2026-11-09 and had open jobs in Ireland (Greenhouse count / Ashby count).
+COMPANY_BOARDS = {
+    "greenhouse": [
+        "stripe", "intercom", "mongodb", "hubspotjobs", "elastic", "toast", "okta", "datadog", "twilio",
+        "gitlab", "airbnb", "tines", "flipdish", "anthropic", "squarespace", "deliveroo",
+    ],
+    "ashby": ["openai", "notion"],
+    "lever": [],
+}
 
 
 # ── Location priority ─────────────────────────────────────────────────────────

@@ -11,13 +11,20 @@ Each morning you get a list of apply links, each paired with its own resume.
                                   ├─► Q-Rattor/job_profiles.yaml  (your summaries per job type)
                                   └─► user_config.py              (your roles, countries, keywords)
                         │
- run_daily.py ──► main.py ──────────► jobs.jsonl          scrape last-24h jobs, dedupe, filter, rank
-              ├─► resort_jobs.py ───► jobs.jsonl          sort by priority + your preferred locations
-              └─► Q-Rattor/pipeline.py                    per job: pick your best experience/projects,
-                        │                                 Ollama (qwen2.5:7b) rewrites bullets, pdflatex → PDF
+ run_daily.py ──► main.py ──────────► jobs.jsonl          scrape last-24h jobs (LinkedIn over plain HTTP, ~10s;
+              │                                           Indeed/Glassdoor via browser), real job location, full descriptions
+              └─► Q-Rattor/pipeline.py                    per job: screen (no senior/intern/3+ yrs/non-Irish-without-sponsorship),
+                        │                                 pick your best experience/projects, Claude Code (headless) rewrites
+                        │                                 the wording in plain English, Ollama is the fallback, then a fact
+                        │                                 check (no invented numbers) and pdflatex → exactly ONE page
                         ▼
                   Q-Rattor/final_apply.json  +  Q-Rattor/output/*.pdf
 ```
+
+LLM backend: `JOOB_LLM_ORDER` (default `claude,ollama`), `JOOB_CLAUDE_MODEL` (`sonnet`/`haiku`),
+`JOOB_MAX_CLAUDE_CALLS` (per-run cap, default 40), `JOOB_JOB_LIMIT` (resumes per run, default 40),
+`JOOB_DRY_RUN=1` (screen jobs only: no model, no files). If Claude hits a usage limit it is switched off for the
+rest of the run and Ollama (or your pre-written bullets) takes over.
 
 ---
 

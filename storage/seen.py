@@ -62,5 +62,15 @@ def mark_seen_bulk(job_ids: list[str]) -> None:
         conn.commit()
 
 
+def unmark_bulk(job_ids: list[str]) -> None:
+    """Forget these IDs so a later run sees them as new again (used for jobs dropped by a cap or a failed fetch)."""
+    if not job_ids:
+        return
+    conn = _get_conn()
+    with _write_lock:
+        conn.executemany("DELETE FROM seen_jobs WHERE job_id = ?", [(j,) for j in job_ids])
+        conn.commit()
+
+
 def count() -> int:
     return _get_conn().execute("SELECT COUNT(*) FROM seen_jobs").fetchone()[0]

@@ -23,16 +23,21 @@ class IndeedScraper(PlaywrightBaseScraper):
 
     def cards_js(self, base_url: str) -> str:
         return f"""() => Array.from(document.querySelectorAll('div.job_seen_beacon')).map(c => {{
-            const titleEl   = c.querySelector('h2.jobTitle a');
+            // Indeed renamed h2 -> h3; match on the stable link class and keep the old selectors as fallbacks.
+            const titleEl   = c.querySelector('a.jcs-JobTitle')
+                           || c.querySelector('h3.jobTitle a')
+                           || c.querySelector('h2.jobTitle a');
             const companyEl = c.querySelector('[data-testid="company-name"]')
                            || c.querySelector('span.companyName')
                            || c.querySelector('[class*="companyName"]');
             const locEl     = c.querySelector('[data-testid="text-location"]')
                            || c.querySelector('div.companyLocation')
                            || c.querySelector('[class*="companyLocation"]');
-            const href      = titleEl ? (titleEl.getAttribute('href') || '') : '';
+            const jk        = titleEl ? (titleEl.getAttribute('data-jk') || '') : '';
+            // canonical, tracking-free link; falls back to whatever href the card had
+            const href      = jk ? '/viewjob?jk=' + jk : (titleEl ? (titleEl.getAttribute('href') || '') : '');
             return {{
-                title:    titleEl   ? titleEl.innerText.trim()   : '',
+                title:    titleEl   ? (((titleEl.querySelector('span[title]') || titleEl).innerText) || '').trim() : '',
                 company:  companyEl ? companyEl.innerText.trim() : '',
                 location: locEl     ? locEl.innerText.trim()     : '',
                 href:     href.startsWith('http') ? href : '{base_url}' + href,

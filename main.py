@@ -10,7 +10,8 @@ from pathlib import Path
 import config
 from scrapers.base import should_exclude, mark_priority
 from storage.jsonl import append_jobs
-from storage.seen import count as seen_count
+from storage.seen import count as seen_count, unmark_bulk
+from scrapers.base import extract_job_id
 
 Path("logs").mkdir(exist_ok=True)
 
@@ -118,6 +119,8 @@ def main() -> None:
         dropped = len(all_jobs) - config.MAX_JOBS_PER_RUN
         log.warning("Capping at %d jobs — dropping %d lowest-priority.",
                     config.MAX_JOBS_PER_RUN, dropped)
+        # These were already marked "seen" by the scrapers; forget them so tomorrow's run picks them up again.
+        unmark_bulk([extract_job_id(j.apply_link) for j in all_jobs[config.MAX_JOBS_PER_RUN:]])
         all_jobs = all_jobs[:config.MAX_JOBS_PER_RUN]
 
     priority_count = sum(1 for j in all_jobs if j.priority)

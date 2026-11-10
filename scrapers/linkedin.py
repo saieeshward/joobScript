@@ -185,7 +185,7 @@ class LinkedInScraper(PlaywrightBaseScraper):
             if r is not None and r.status_code not in (429, 500, 502, 503, 999):
                 return None
             import time as _t
-            _t.sleep(3 * attempt + random.random())
+            _t.sleep(8 * attempt + random.random() * 4)   # rate limited: wait longer each time
         return None
 
     async def async_scrape(self, queries: list[str]) -> list[Job]:
@@ -198,8 +198,15 @@ class LinkedInScraper(PlaywrightBaseScraper):
                 for start in range(0, per_query, 10):
                     cards = await asyncio.to_thread(self._http_listing, query, geo_id, start)
                     if cards is None:
+                        if jobs:   # rate limited part-way: keep what we have, try again tomorrow
+                            log.warning("LinkedIn rate-limited after %d job(s); keeping them and stopping for today", len(jobs))
+                            return jobs
                         log.warning("LinkedIn HTTP listing refused; falling back to the browser for this run")
-                        return await self._browser_scrape(queries)
+                        try:
+                            return await self._browser_scrape(queries)
+                        except Exception as exc:           # e.g. Chromium not installed: never lose a run to the fallback
+                            log.error("LinkedIn browser fallback failed: %s", str(exc).splitlines()[0])
+                            return jobs
                     if not cards:
                         break
                     page_jobs, seen_ratio = await self._process_cards(None, cards, lambda c, cc=country: cc)
@@ -207,5 +214,5 @@ class LinkedInScraper(PlaywrightBaseScraper):
                     if seen_ratio >= config.EARLY_STOP_THRESHOLD:
                         log.info("linkedin: early stop (%.0f%% seen)", seen_ratio * 100)
                         break
-                    await asyncio.sleep(random.uniform(0.3, 0.9))
+                    await asyncio.sleep(random.uniform(1.0, 2.5))      # be gentle: ~60 listing requests per query set
         return jobs

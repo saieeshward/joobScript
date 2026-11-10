@@ -7,7 +7,8 @@ from __future__ import annotations
 import re
 
 SENIOR_TITLE = re.compile(
-    r"\b(senior|sr\.?|lead|principal|staff|head of|director|manager|architect|vp|vice president)\b", re.I)
+    r"\b(senior|sr\.?|lead|principal|staff|head of|director|manager|architect|vp|vice president)\b"
+    r"|\b(?:engineer|developer|scientist|analyst|programmer)\s+(?:iii|iv|v|3|4|5)\b", re.I)   # "Software Engineer 3" = level 3
 INTERN_TITLE = re.compile(
     r"\b(intern|interns|internship|co-?op|work placement|placement|apprentice(ship)?|volunteer|unpaid)\b", re.I)
 TITLE_AI = re.compile(

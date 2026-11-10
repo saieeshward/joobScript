@@ -15,13 +15,14 @@ Tuning knobs are environment variables (see llm.py) and the constants below.
 """
 
 import os, re, json, subprocess, yaml
-from datetime import datetime
+from datetime import datetime, date, timedelta
 
 import guards
 import llm
 
 # ── Config ────────────────────────────────────────────────────────────────────
 JOBS_PER_SESSION  = int(os.environ.get("JOOB_JOB_LIMIT", "40"))   # resumes written per run
+MAX_AGE_DAYS      = int(os.environ.get("JOOB_MAX_AGE_DAYS", "7"))   # ignore jobs scraped longer ago than this
 SKIP_INTERNSHIPS  = os.environ.get("JOOB_SKIP_INTERNSHIPS", "1") != "0"
 REUSE_THRESHOLD   = 0.95
 INPUT_JSONL       = "../jobs.jsonl"
@@ -64,6 +65,8 @@ def read_jobs(path, skip_links):
             link = job.get("apply_link", "")
             if not link or link in skip_links or link in seen:
                 continue
+            if MAX_AGE_DAYS and job.get("scraped_on", "9999") < (date.today() - timedelta(days=MAX_AGE_DAYS)).isoformat():
+                continue                      # stale: the posting is probably closed
             seen.add(link)
             jobs.append(job)
     jobs.sort(key=lambda j: (j.get("scraped_on", ""), bool(j.get("priority"))), reverse=True)
@@ -455,14 +458,14 @@ def render_one_page(template_text, resume_data, content, out_prefix):
 
 
 # ── Orchestration per job ─────────────────────────────────────────────────────
-def base_summary(resume_data, primary_type, layout):
-    """Approved summary wording from resume_data.yaml (falls back to the job profile text)."""
+def base_summary(resume_data, primary_type, layout, profile=None):
+    """Approved summary wording from resume_data.yaml; falls back to the job profile's summary_focus."""
     s = resume_data.get("summaries", {})
     if layout == "grad" and s.get("graduate_data"):
         return s["graduate_data"]
     if primary_type == "backend" and s.get("software_backend"):
         return s["software_backend"]
-    return s.get("ai_engineer", "")
+    return s.get("ai_engineer") or " ".join((profile or {}).get("summary_focus", "").split())
 
 def tailor(resume_data, system_prompt, job, primary_type, profile, exps, projs_sel, allowed, layout="experienced"):
     """Returns (checked, summary, skills, backend). checked=None means curated fallback."""
@@ -471,7 +474,7 @@ def tailor(resume_data, system_prompt, job, primary_type, profile, exps, projs_s
     for attempt in (1, 2):
         try:
             out, backend = llm.generate_json(system_prompt,
-                                             build_user_prompt(job, primary_type, profile, exps, projs_sel, counts, base_summary(resume_data, primary_type, layout), feedback))
+                                             build_user_prompt(job, primary_type, profile, exps, projs_sel, counts, base_summary(resume_data, primary_type, layout, profile), feedback))
         except llm.LLMError as ex:
             print("  LLM unavailable (" + str(ex)[:140] + "), using curated bullets")
             return None, "", [], "curated"
@@ -513,9 +516,10 @@ def main():
         ok, reason = guards.screen_job(job, text, SKIP_INTERNSHIPS)
         primary_type, blend, hits = classify_job(job, profiles)
         tl = text.lower()
-        # food-tech exception: needs a food word AND a tech word, so cook/kitchen/food-safety jobs don't qualify
+        # food-tech exception: a food word in the text AND a tech word in the TITLE (cook / food-safety jobs don't qualify)
         food_job = any(w in tl for w in FOOD_WORDS) and re.search(
-            r"\b(ai|data|software|digital|technology|automation|analytics|machine learning|python)\b", tl) is not None
+            r"\b(ai|data|software|digital|technology|technologist|automation|analytics|machine learning|python)\b",
+            title.lower()) is not None
         if ok and not food_job and not guards.is_target_role(job, text):
             ok, reason = False, "not an AI/ML/data or Python/software role"
         if not ok:
@@ -536,7 +540,8 @@ def main():
 
         entry = {"apply_link": link, "job_name": title, "company": job.get("company", ""),
                  "location": job.get("location", ""), "country": job.get("country", ""),
-                 "job_type": primary_type, "layout": layout, "fit_score": hits, "applied": False}
+                 "job_type": primary_type, "layout": layout, "fit_score": hits, "applied": False,
+                 "generated_on": date.today().isoformat()}
 
         reuse, sim = find_reusable(fp, cache)
         if reuse:
@@ -551,7 +556,7 @@ def main():
         checked, summary, skills, backend = tailor(resume_data, system_prompt, job, primary_type,
                                                    profile, exps, projs_sel, allowed, layout)
         content = build_content(resume_data, profile, exps, projs_sel, additional, layout, checked,
-                                summary or base_summary(resume_data, primary_type, layout), skills, text.lower())
+                                summary or base_summary(resume_data, primary_type, layout, profile), skills, text.lower())
         # curated bullets for all projects (not only the 4 the LLM saw) so the ladder can swap in others
         for p in projs[LADDER[0]["n_proj"]:]:
             content["projects"].append({**p, "desc": p.get("desc", "")})
@@ -574,6 +579,11 @@ def main():
 
     if not DRY_RUN:
         save_json(SKIPPED_FILE, skipped)
+        try:
+            import export
+            print("CSV: %d row(s) in Q-Rattor/jobs_to_apply.csv" % export.write_csv())
+        except Exception as ex:                     # the CSV is a convenience; never fail the run over it
+            print("CSV export skipped:", ex)
     print("\nDone. %d resumes | %s" % (produced, llm.summary()))
 
 

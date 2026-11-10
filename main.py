@@ -38,6 +38,10 @@ def build_scrapers():
     enabled = set(config.ENABLED_SITES)
     scrapers = {}
 
+    if "boards" in enabled:
+        from scrapers.boards import BoardsScraper
+        scrapers["boards"] = BoardsScraper()
+
     if "linkedin" in enabled:
         scrapers["linkedin"] = LinkedInScraper()
 

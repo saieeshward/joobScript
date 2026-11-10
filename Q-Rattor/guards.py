@@ -122,6 +122,9 @@ def skill_vocabulary(resume_data: dict) -> dict[str, str]:
     vocab = {}
     for s in resume_data.get("skills", []):
         vocab[s.lower()] = s
+    for items in (resume_data.get("skill_groups") or {}).values():      # grouped skills are approved too
+        for s in items:
+            vocab.setdefault(s.lower(), s)
     for sec in ("work_experience", "projects"):
         for e in resume_data.get(sec, []):
             for t in e.get("tech", []):

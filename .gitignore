@@ -31,3 +31,9 @@ Q-Rattor/job_profiles.yaml
 Q-Rattor/*.bak*
 Q-Rattor/archive/
 joobScript.clan
+
+# Nightly harness
+nightly.env
+Q-Rattor/today.md
+Q-Rattor/NEEDS_YOUR_CONFIRMATION.md
+Q-Rattor/jobs_to_apply.csv

@@ -1,6 +1,5 @@
 playwright
 playwright-stealth
-openpyxl
 pyyaml
 requests
 pypdf

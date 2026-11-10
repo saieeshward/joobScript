@@ -2,11 +2,14 @@
 # Copy to resume_data.yaml (setup.sh does this) and replace every placeholder.
 #
 # Rules:
-#   - Only put true facts here. The LLM is told never to invent anything, so
-#     whatever metrics/tools you want on the resume must already be in here.
-#   - `tech` lists drive matching against job descriptions — be generous.
-#   - `full_context` is what the LLM reads to write tailored bullets.
-#   - `end_date` (YYYY-MM) is used to sort newest-first. Use 2099-01 for "Present".
+#   - Only put true facts here. The pipeline rejects any number the model writes that is not in this file, and
+#     the model is told never to invent anything, so every metric/tool you want on the resume must be here.
+#   - Write bullets for a recruiter who is NOT an engineer: one line, what you built, for whom, the result
+#     ("Cut report time from 2 days to 10 minutes for the finance team"), no internal jargon or ticket numbers.
+#   - `tech` lists drive matching against job descriptions: be generous. `tech_short` (max 4) is what is printed.
+#   - `full_context` is what the model reads to write tailored bullets; `bullets` are your approved wording
+#     (the model picks and lightly rewords them, and they are used as-is when no model is available).
+#   - `end_date` (YYYY-MM) sorts newest-first. Use 2099-01 for "Present".
 #   - publications / certifications can be empty lists ([]) — the section is dropped.
 
 personal:
@@ -19,6 +22,8 @@ personal:
     linkedin_display: "linkedin.com/in/your-handle"
     portfolio: "https://your-site.example.com"
     location: "Dublin, Ireland"          # shown in the resume header
+    link_style: "labels"                 # "labels" = LinkedIn | GitHub | Portfolio;  "urls" = show the addresses
+    headline: "AI Engineer | LLM agents, RAG, Python | MSc Computer Science"
 
 
 work_experience:
@@ -27,13 +32,14 @@ work_experience:
       location: "Dublin, Ireland"
       dates: "Jan 2024--Present"
       end_date: 2099-01
+      always_include: true               # never dropped when the page has to shrink
       tech: ["Python", "FastAPI", "PostgreSQL", "Docker", "AWS"]
       full_context: >
           Describe what you actually did in a few sentences: what you built, the
           stack, the scale, and any real numbers (latency, users, accuracy, etc.).
-      bullets:
-          - "Fallback bullet used if the LLM is unavailable — action verb + what + result."
-          - "Second fallback bullet."
+      bullets:                           # most impactful first; the first 3-4 are used
+          - "Built a billing API used by 3 teams, cutting invoice errors by 40%."
+          - "Second approved bullet: action verb + what + result."
 
     - title: "Data Intern"
       company: "Another Company"
@@ -44,8 +50,25 @@ work_experience:
       full_context: >
           Same idea — the more concrete detail here, the better the tailored bullets.
       bullets:
-          - "Fallback bullet one."
-          - "Fallback bullet two."
+          - "Automated a weekly sales report, saving the team about 3 hours a week."
+          - "Second approved bullet."
+
+    - title: "Barista"
+      company: "Local Cafe"
+      location: "Dublin, Ireland"
+      dates: "Sep 2022--Present"
+      end_date: 2099-01
+      part_time: true
+      # Unrelated job: hidden from tech resumes, shown in full only when the job text contains one of these words,
+      # otherwise reduced to the one-line `additional_line` (dropped if the page is full).
+      show_when_keywords: ["food", "restaurant", "hospitality", "cafe", "catering"]
+      additional_line: "Barista (part-time), Local Cafe, Dublin, Sep 2022 - Present: customer service in a busy team"
+      tech: ["Customer Service", "Teamwork"]
+      full_context: >
+          Part-time barista alongside studies.
+      bullets:
+          - "Served 150+ customers a day in a fast-paced cafe."
+          - "Trained new staff on the till and opening routine."
 
 
 education:
@@ -55,7 +78,7 @@ education:
       extra: "Optional line — dissertation, grade, etc. Delete this key if unused."
 
 
-publications:
+publications:                            # the first two are printed
     - "Paper title. Venue Year"
 
 
@@ -63,18 +86,39 @@ projects:
     - name: "Project Name"
       dates: "2024"
       end_date: 2024-06
-      tech: ["Python", "PyTorch"]
+      always_include: false               # true = never dropped
+      link: "https://github.com/your-handle/project"      # optional, printed as a clickable link
+      link_display: "github.com/your-handle/project"
+      tech: ["Python", "PyTorch", "Docker", "FastAPI", "Postgres"]
+      tech_short: ["Python", "PyTorch"]   # max 4 printed next to the name
       full_context: >
           What the project is, how it works, what tech, what results.
-      desc: "One-line description used as fallback."
+      desc: "One plain-English line a recruiter understands, with the result."
 
-    # Add 5–10 projects; the pipeline picks the 5–6 most relevant per job.
+    # Add 5–10 projects; the pipeline picks the most relevant per job.
 
 
-certifications:
+certifications:                           # not printed by default (kept for your records)
     - "Certification Name (Year)"
 
 skills:
     - "Python"
     - "SQL"
     - "Git"
+
+# Skills are printed in these groups. Only skills listed here appear on the resume, so leave out anything you
+# could not talk about in an interview.
+skill_groups:
+    "AI & LLMs": ["LLMs", "RAG"]
+    "Machine Learning": ["PyTorch"]
+    "Languages": ["Python", "SQL"]
+    "Data & Tools": ["Git", "Docker"]
+
+core_skills: ["Python", "SQL"]            # always shown on every resume
+
+# Approved summary wording (max ~40 words, no first person). The pipeline adapts the right one to each job:
+# graduate-programme jobs -> graduate_data, backend/software jobs -> software_backend, otherwise ai_engineer.
+summaries:
+    ai_engineer: "AI engineer building LLM tools that draft work for people to approve. MSc Computer Science."
+    graduate_data: "MSc Computer Science graduate with hands-on machine learning projects. Skilled in Python and SQL."
+    software_backend: "Engineer building backend services in Python. MSc Computer Science."

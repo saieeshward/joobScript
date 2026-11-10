@@ -81,3 +81,38 @@ def test_resume_renders_to_exactly_one_page(resume, profiles, tmp_path, monkeypa
     tpl = open(os.path.join(QR, "resume_template.tex.j2"), encoding="utf-8").read()
     _tex, pdf, pages, _step = P.render_one_page(tpl, resume, content, str(out / "t"))
     assert pages == 1 and os.path.exists(pdf)
+
+
+def test_fit_answers_template_guards_and_retry(resume, monkeypatch):
+    import fit_answers, llm
+    job = {"job_name": "AI Engineer", "company": "Acme", "description": "We use Python, RAG and LLMs daily. Docker too."}
+    tpl = fit_answers._template(resume, job)
+    assert "visa" not in (tpl["why_good_fit"] + tpl["cold_email"]).lower() and tpl["cold_email_subject"]
+    allowed = P.guards.allowed_numbers(resume)
+    note = " ".join(["Plain words fill this short sentence for the test run now."] * 5)       # 50 words, 5 sentences, no digits
+    body = " ".join(["word"] * 130)
+    calls = []
+
+    def fake(system, user):
+        calls.append(user)
+        bad = {"short_note": note + " I cut costs by 73%.", "cold_email_subject": "S", "cold_email_body": body}
+        good = {"short_note": note, "cold_email_subject": "S", "cold_email_body": body}
+        return (bad if len(calls) == 1 else good), "fake"
+
+    monkeypatch.setattr(llm, "generate_json", fake)
+    out, by = fit_answers.answer_for(resume, "sys", job, allowed)
+    assert by == "fake" and len(calls) == 2 and "73" not in out["why_good_fit"]      # invented 73% rejected, retried once
+
+    monkeypatch.setattr(llm, "generate_json", lambda s, u: ({"short_note": note, "cold_email_subject": "S", "cold_email_body": "too short"}, "fake"))
+    out, by = fit_answers.answer_for(resume, "sys", job, allowed)
+    assert by == "template"                                    # still invalid after the retry -> safe template
+
+
+def test_match_report_verdicts(resume):
+    g = P.guards
+    strong = g.match_report(resume, "AI Engineer", "Python, SQL, RAG and LLMs required")
+    assert strong["verdict"] == g.STRONG and strong["gap"] == []
+    weak = g.match_report(resume, "Engineer", "We need aws azure gcp kubernetes terraform spark")
+    assert weak["verdict"] == g.WEAK and "skills gap" in weak["reason"]
+    assert g.match_report(resume, "Engineer", "5+ years of experience with python sql rag llm")["verdict"] == g.WEAK
+    assert g.match_report(resume, "Engineer", "Python")["verdict"] == g.UNCLEAR

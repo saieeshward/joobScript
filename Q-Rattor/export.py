@@ -26,22 +26,13 @@ COLUMNS = [
     "status", "applied", "notes",                                   # yours, kept between runs
     "job_title", "company", "location", "source", "scraped_on", "apply_link",
     "resume_pdf", "resume_link",
+    "match_verdict", "match_reason", "skills_gap",
+    "why_good_fit", "cold_email_subject", "cold_email",
     "description",
     "ats_match_pct", "job_keywords_missing_from_resume", "job_keywords_found_in_resume",
     "years_required", "sponsorship", "salary_mentioned",
     "job_type", "resume_layout", "fit_score", "resume_written_by", "resume_date",
 ]
-
-# Words an applicant-tracking system is likely to match literally. Kept short and tech-focused.
-KEYWORDS = [
-    "python", "pytorch", "tensorflow", "keras", "scikit-learn", "pandas", "numpy", "sql", "nosql", "postgres",
-    "mongodb", "docker", "kubernetes", "aws", "azure", "gcp", "terraform", "ci/cd", "git", "linux", "rest",
-    "api", "fastapi", "flask", "django", "react", "typescript", "javascript", "node", "java", "go", "rust", "c++",
-    "llm", "llms", "rag", "nlp", "computer vision", "machine learning", "deep learning", "generative ai", "genai",
-    "prompt engineering", "fine-tuning", "agents", "mlops", "spark", "kafka", "airflow", "dbt", "tableau",
-    "power bi", "langchain", "vector database", "embeddings", "evaluation", "data pipelines", "etl",
-]
-
 
 def _has(term: str, text: str) -> bool:
     return re.search(r"(?<![a-z0-9+#])" + re.escape(term) + r"(?![a-z0-9+#])", text) is not None
@@ -89,6 +80,8 @@ def _salary(text: str) -> str:
 
 
 def build_rows() -> list[dict]:
+    import yaml
+    resume_data = yaml.safe_load(open(RESUME_DATA, encoding="utf-8"))
     final = _load(FINAL_JSON, [])
     jobs = _jobs_by_link()
     rows = []
@@ -99,9 +92,10 @@ def build_rows() -> list[dict]:
         pdf_rel = e.get("pdf_path", "")
         pdf_abs = os.path.abspath(os.path.join(HERE, pdf_rel)) if pdf_rel else ""
         resume_text = _pdf_text(pdf_abs) if pdf_abs and os.path.exists(pdf_abs) else ""
-        wanted = [k for k in KEYWORDS if _has(k, text)]
+        mr = guards.match_report(resume_data, e["job_name"], description)
+        wanted = mr["want"]
         found = [k for k in wanted if _has(k, resume_text)]
-        missing = [k for k in wanted if k not in found]
+        missing = [k for k in mr["have"] if k not in found]       # you have it, but the resume does not say so
         yrs = guards.required_years(e["job_name"] + "\n" + description)
         rows.append({
             "status": "to apply", "applied": "yes" if e.get("applied") else "no", "notes": "",
@@ -109,6 +103,9 @@ def build_rows() -> list[dict]:
             "location": e.get("location", ""), "source": job.get("source_site", ""),
             "scraped_on": job.get("scraped_on", ""), "apply_link": e["apply_link"],
             "resume_pdf": pdf_abs, "resume_link": ("file://" + pdf_abs.replace(" ", "%20")) if pdf_abs else "",
+            "match_verdict": mr["verdict"], "match_reason": mr["reason"], "skills_gap": ", ".join(mr["gap"]),
+            "why_good_fit": e.get("why_good_fit", ""), "cold_email_subject": e.get("cold_email_subject", ""),
+            "cold_email": e.get("cold_email", ""),
             "description": description,
             "ats_match_pct": round(100 * len(found) / len(wanted)) if wanted else "",
             "job_keywords_missing_from_resume": ", ".join(missing),

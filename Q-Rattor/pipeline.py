@@ -222,7 +222,13 @@ def build_user_prompt(job, primary_type, profile, exps, projs_sel, bullet_counts
         'Return JSON: {"summary": "...", "skills": ["..."], '
         '"work_experience": [{"company": "...", "bullets": ["..."]}], '
         '"projects": [{"name": "...", "desc": "..."}]}\n\n'
+        "FIRST, silently extract from the JOB TEXT: its core technical skills, its main responsibilities and the exact "
+        "keywords an applicant-tracking system will look for. THEN align the wording to them.\n"
         "RULES (this resume is read by recruiters who are not engineers, then by engineers):\n"
+        "- Every line must be defensible in an interview. If a bullet is weak, improve the wording, never the meaning. "
+        "Do not change the candidate's experience level, the order of roles, or invent any skill, tool, metric or result.\n"
+        "- Replace a synonym with the job's own keyword only when the candidate's facts genuinely support it "
+        "(e.g. say 'RAG' if the job says RAG and the facts describe retrieval-augmented generation).\n"
         "- Plain English. Each bullet = what was built or done, for whom, and the result (action then result). "
         "Max 20 words, one line if possible. Start with a strong verb.\n"
         "- No internal jargon or process words: no ADR, schema, bench, gates, pipeline stages, licences, ticket "
@@ -527,6 +533,15 @@ def main():
             print("  skip [" + reason + "]: " + title + " - " + job.get("company", ""))
             continue
 
+        if ok and not food_job:
+            mr = guards.match_report(resume_data, title, job.get("description", ""))
+            if mr["verdict"] == guards.WEAK:
+                ok, reason = False, "weak match: " + mr["reason"]
+            if not ok:
+                skipped[link] = reason
+                print("  skip [" + reason + "]: " + title + " - " + job.get("company", ""))
+                continue
+
         if DRY_RUN:
             print("  WOULD GENERATE: %s - %s (%s)" % (title, job.get("company", ""), job.get("location", "")))
             produced += 1
@@ -580,7 +595,8 @@ def main():
     if not DRY_RUN:
         save_json(SKIPPED_FILE, skipped)
         try:
-            import export
+            import fit_answers, export
+            fit_answers.main()                      # "Why are you a good fit?" for every resume that lacks one
             print("CSV: %d row(s) in Q-Rattor/jobs_to_apply.csv" % export.write_csv())
         except Exception as ex:                     # the CSV is a convenience; never fail the run over it
             print("CSV export skipped:", ex)
